@@ -80,26 +80,8 @@ See [INSTALL.md](INSTALL.md) for instructions for python environment setup and m
 
 3DB can reconstruct 3D full-body human mesh from a single image, optionally with keypoint/mask prompts and/or hand refinement from the hand decoder. 
 
-For a quick start, try the following lines of code with models loaded directly from [Hugging Face](https://huggingface.co/facebook) (please make sure to follow [INSTALL.md](INSTALL.md) to request access to our checkpoints.).
+For a quick start, run our demo script for model inference and visualization with models from [Hugging Face](https://huggingface.co/facebook) (please make sure to follow [INSTALL.md](INSTALL.md) to request access to our checkpoints.).
 
-
-```python
-from sam_3d_body import load_sam_3d_body_hf, SAM3DBodyEstimator
-
-# Load model from HuggingFace
-model, model_cfg = load_sam_3d_body_hf("facebook/sam-3d-body-dinov3")
-
-# Create estimator
-estimator = SAM3DBodyEstimator(
-    sam_3d_body_model=model,
-    model_cfg=model_cfg,
-)
-
-# 3D human mesh recovery
-outputs = estimator.process_one_image("path/to/image.jpg")
-```
-
-You can also run our demo script for model inference and visualization:
 ```bash
 # Download assets from HuggingFace
 hf download facebook/sam-3d-body-dinov3 --local-dir checkpoints/sam-3d-body-dinov3
@@ -110,6 +92,26 @@ python demo.py \
     --output_folder <path_to_output> \
     --checkpoint_path ./checkpoints/sam-3d-body-dinov3/model.ckpt \
     --mhr_path ./checkpoints/sam-3d-body-dinov3/assets/mhr_model.pt
+```
+
+You can also try the following lines of code with models loaded directly from [Hugging Face](https://huggingface.co/facebook)
+
+```python
+import cv2
+import numpy as np
+from notebook.utils import setup_sam_3d_body
+from tools.vis_utils import visualize_sample_together
+
+# Set up the estimator
+estimator = setup_sam_3d_body(hf_repo_id="facebook/sam-3d-body-dinov3")
+
+# Load and process image
+img_bgr = cv2.imread("path/to/image.jpg")
+outputs = estimator.process_one_image(cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB))
+
+# Visualize and save results
+rend_img = visualize_sample_together(img_bgr, outputs, estimator.faces)
+cv2.imwrite("output.jpg", rend_img.astype(np.uint8))
 ```
 
 For a complete demo with visualization, see [notebook/demo_human.ipynb](notebook/demo_human.ipynb).
@@ -147,7 +149,7 @@ See [contributing](CONTRIBUTING.md) and the [code of conduct](CODE_OF_CONDUCT.md
 ## Contributors
 
 The SAM 3D Body project was made possible with the help of many contributors:
-Vivian Lee, George Orlin, Nikhila Ravi, Andrew Westbury, Jyun-Ting Song, Zejia Weng, Xizi Zhang, Yuting Ye, Federica Bogo, Ronald Mallet, Ahmed Osman, Rawal Khirodkar, Javier Romero, Carsten Stoll, Juan Carlos Guzman, Sofien Bouaziz, Yuan Dong, Su Zhaoen, Fabian Prada, Alexander Richard, Michael Zollhoefer, Roman Rädle, Sasha Mitts, Michelle Chan, Yael Yungster, Azita Shokrpour, Helen Klein, Mallika Malhotra, Ida Cheng, Eva Galper.
+Vivian Lee, George Orlin, Nikhila Ravi, Andrew Westbury, Jyun-Ting Song, Zejia Weng, Xizi Zhang, Yuting Ye, Federica Bogo, Ronald Mallet, Ahmed Osman, Rawal Khirodkar, Javier Romero, Carsten Stoll, Jean-Charles Bazin, Sofien Bouaziz, Yuan Dong, Su Zhaoen, Fabian Prada, Alexander Richard, Michael Zollhoefer, Roman Rädle, Sasha Mitts, Michelle Chan, Yael Yungster, Azita Shokrpour, Helen Klein, Mallika Malhotra, Ida Cheng, Eva Galper.
 
 ## Citing SAM 3D Body
 
